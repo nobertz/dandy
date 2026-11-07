@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F1E7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1F18" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<title>Dandy</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dandy">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600&display=swap">
+<style>
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: single-column phone app, sticky top bar, fixed bottom tab bar, sheets slide up from the bottom */
+:root{
+  --bg:#F6F1E7; --surface:#FFFDF8; --sunk:#EDE6D8; --line:#DDD3C1;
+  --fg:#2F3326; --muted:#7A7466; --accent:#4F6B3E; --accent-ink:#FFFDF8; --accent-soft:#E2E7D3;
+  --ph-men:#B4544A; --ph-fol:#8DA676; --ph-ovu:#D2A24C; --ph-lut:#A88B6E; --ph-pms:#7B5B47;
+  --m5:#4F6B3E; --m4:#8DA676; --m3:#C9B88F; --m2:#B98A63; --m1:#7B5B47;
+  --display:"Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --body:"Figtree", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1C1F18; --surface:#252920; --sunk:#2D3127; --line:#3A3F33;
+  --fg:#ECE6D8; --muted:#A39C8B; --accent:#A9C38E; --accent-ink:#1C1F18; --accent-soft:#33402A;
+  --ph-men:#C9665B; --ph-fol:#8DA676; --ph-ovu:#D6AA57; --ph-lut:#B0937A; --ph-pms:#94735E;
+  --m5:#A9C38E; --m4:#7F9A69; --m3:#BFAE87; --m2:#B98A63; --m1:#94735E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1C1F18; --surface:#252920; --sunk:#2D3127; --line:#3A3F33;
+  --fg:#ECE6D8; --muted:#A39C8B; --accent:#A9C38E; --accent-ink:#1C1F18; --accent-soft:#33402A;
+  --ph-men:#C9665B; --ph-fol:#8DA676; --ph-ovu:#D6AA57; --ph-lut:#B0937A; --ph-pms:#94735E;
+  --m5:#A9C38E; --m4:#7F9A69; --m3:#BFAE87; --m2:#B98A63; --m1:#94735E; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(86px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;padding-block:14px 10px}
+.top h1{font-family:var(--display);font-size:30px;line-height:1.05;flex:1;min-width:0}
+.top .sub{display:block;font-family:var(--body);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:18px;height:18px;stroke:var(--fg);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pillbtn{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:500}
+.view{display:flex;flex-direction:column;gap:14px;padding-bottom:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.label{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.label small{font-weight:500;letter-spacing:0;text-transform:none;font-size:12px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+/* phase banner */
+.phase-banner{display:flex;align-items:center;gap:12px;border-radius:var(--r);padding:12px 14px;border:1px solid var(--line);background:var(--surface);text-align:left;width:100%}
+.phase-banner .swatch{width:12px;align-self:stretch;border-radius:6px;flex:none}
+.phase-banner b{font-family:var(--display);font-weight:400;font-size:22px;display:block;line-height:1.1}
+.phase-banner .grow{flex:1;min-width:0}
+.chev{color:var(--muted);font-size:20px}
+/* moods */
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mood{border:none;background:none;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);border-radius:12px}
+.mood svg{width:44px;height:44px;transition:transform .15s}
+.mood[aria-pressed="true"]{color:var(--fg);font-weight:600;background:var(--sunk)}
+.mood[aria-pressed="true"] svg{transform:scale(1.08)}
+.mood[aria-pressed="false"] svg{opacity:.55}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:6px 12px;font-size:13.5px;line-height:1.2}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.men[aria-pressed="true"]{background:var(--ph-men);border-color:var(--ph-men);color:#FFF8F2}
+.seg{display:grid;gap:6px}
+.seg .chip{border-radius:10px;padding:9px 4px;text-align:center;font-size:12.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row > *{min-width:0}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+.field span{font-size:12px;color:var(--muted)}
+input[type=time],input[type=date],input[type=text],input[type=number],textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%;min-height:42px}
+textarea{min-height:80px;resize:vertical}
+.hours{font-family:var(--display);font-size:26px;line-height:1}
+.toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.goal{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.goal:first-child{border-top:none}
+.goal input{width:22px;height:22px;accent-color:var(--accent)}
+.banner{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--accent-soft);border-radius:var(--r);padding:12px 14px;font-size:13.5px}
+.saved{font-size:12px;color:var(--muted);text-align:center;min-height:16px}
+/* calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-head h2{font-family:var(--display);font-size:24px}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow div{text-align:center;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em}
+.day{aspect-ratio:1/1.08;max-width:100%;border-radius:10px;border:1.5px solid transparent;background:none;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:5px;font-size:14px;font-variant-numeric:tabular-nums}
+.day.out{visibility:hidden}
+.day.today{box-shadow:inset 0 0 0 2px var(--fg)}
+.day .dot{position:absolute;bottom:6px;width:9px;height:9px;border-radius:50%}
+.day.predicted{border-style:dashed}
+.day .heads{position:absolute;top:3px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--fg);opacity:.45}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--sunk);border-radius:12px;padding:10px}
+.stat b{display:block;font-family:var(--display);font-weight:400;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted)}
+.insight{display:flex;gap:10px;padding:8px 0;font-size:14px}
+.insight + .insight{border-top:1px solid var(--line)}
+.insight i{width:10px;height:10px;border-radius:50%;flex:none;margin-top:6px}
+/* trends */
+.chart{width:100%;overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto}
+.barrow{display:grid;grid-template-columns:96px 1fr 36px;gap:10px;align-items:center;font-size:13.5px;padding:4px 0}
+.bar{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden}
+.bar > div{height:100%;border-radius:5px}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+/* settings */
+.editchip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--bg);font-size:13.5px}
+.editchip button{border:none;background:none;padding:6px 4px 6px 12px}
+.editchip .x{padding:6px 10px 6px 6px;color:var(--muted)}
+.editchip input{border:none;background:none;padding:6px 12px;min-height:0;width:9em}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.addrow input{flex:1}
+.btn{border:none;border-radius:10px;padding:10px 16px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.ghost{background:var(--sunk);color:var(--fg)}
+.btn.danger{background:var(--ph-men);color:#FFF8F2}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.list-item:first-child{border-top:none}
+.textlink{border:none;background:none;color:var(--accent);font-weight:600;padding:4px}
+details summary{cursor:pointer;font-weight:600}
+details p,details ol{margin:.5em 0;font-size:13.5px}
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);padding:6px 0}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent);font-weight:600}
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,22,16,.42);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:88%;overflow-y:auto;border-radius:20px 20px 0 0;
+  padding:18px max(18px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.mood svg{transition:none}}
+.sheet h2{font-family:var(--display);font-size:28px;line-height:1.1;margin-bottom:4px}
+.sheet h3{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.sheet p{margin:0 0 8px;max-width:62ch}
+.sheet ul{margin:0;padding-left:18px}
+.sheet li{margin:3px 0}
+.sheet .close{float:right}
+.hormone{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.hormone span{font-size:12px;background:var(--sunk);border-radius:99px;padding:4px 10px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:13px;z-index:30}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+<nav class="tabs" aria-label="Sections"><div class="in" id="tabs"></div></nav>
+<div id="toastHost"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- constants ---------- */
+const STORE="dandy.v1";
+const MOODS=[null,{n:"Awful",c:"--m1"},{n:"Bad",c:"--m2"},{n:"Okay",c:"--m3"},{n:"Good",c:"--m4"},{n:"Great",c:"--m5"}];
+const SLEEPQ=["Poor","OK","Good","Great"];
+const ENERGY=["Very low","Low","Moderate","High","Very high"];
+const ACTIVITY=["None","Light","Moderate","Good workout","Awesome workout"];
+const EATING=["Very unhealthy","Not very healthy","Somewhat healthy","Healthy"];
+const FLOW=["Spotting","Light","Medium","Heavy"];
+const CATS=[["emotions","Emotions"],["health","Health"],["food","Food"],["social","Social"],["symptoms","Period symptoms"]];
+const DEFAULT_LISTS={
+  emotions:["happy","calm","grateful","excited","content","anxious","stressed","sad","irritable","angry","lonely","overwhelmed","bored","tired","motivated","loved","productive","satisfied","focused","distracted"],
+  health:["cardio","weight bearing","walk","yoga/stretch","drank enough water","took meds/vitamins","sick","headache","outdoors/sunlight","meditation"],
+  food:["home-cooked","ate out","sweets/cravings","skipped a meal","overate","snacky"],
+  social:["friends","family","partner","coworkers","date","party/event","alone time","call/text","conflict","social media heavy"],
+  symptoms:["cramps","bloating","breast tenderness","back pain","headache","acne","fatigue","cravings","mood swings","irritable","nausea","spotting","insomnia","diarrhea/constipation"]
+};
+const PH={
+  men:{name:"Menstrual",v:"--ph-men"},fol:{name:"Follicular",v:"--ph-fol"},ovu:{name:"Ovulatory",v:"--ph-ovu"},
+  lut:{name:"Luteal",v:"--ph-lut"},pms:{name:"Late luteal",v:"--ph-pms"}
+};
+const PHASE_INFO={
+  men:{hormones:["Estrogen low","Progesterone low","Prostaglandins high","FSH starting to rise"],
+    body:"The drop in progesterone at the end of the last cycle causes the endometrium to shed. Prostaglandins drive the uterine contractions behind cramps, and can also loosen the bowels. Late in this phase, FSH starts recruiting follicles for the next cycle.",
+    mood:"Energy is often at its lowest and you may feel more inward. Many people feel relief once bleeding starts, as the PMS hormone dip is over.",
+    ease:["Heat on the lower abdomen or back","Gentle movement: walks, yoga, stretching","Anti-inflammatories work best started at the first sign of cramps, if they're right for you","Rest and an earlier bedtime","Stay hydrated, especially if your flow is heavy"],
+    food:["Iron: lentils, beans, spinach, red meat, tofu","Vitamin C alongside iron to improve absorption (citrus, peppers, berries)","Ginger tea or fresh ginger for cramps and nausea","Omega-3s for inflammation: salmon, sardines, walnuts, chia","Warm, easy foods: soups, stews, oatmeal"]},
+  fol:{hormones:["FSH stimulates follicles","Estrogen rising","Endometrium rebuilding"],
+    body:"FSH stimulates a group of follicles, and one becomes dominant. Its rising estrogen rebuilds the uterine lining and tends to improve insulin sensitivity and recovery.",
+    mood:"Rising estrogen often brings more energy, motivation, optimism and focus. A good window for starting projects and harder workouts.",
+    ease:["Schedule demanding tasks and social plans here","Try heavier lifting or higher-intensity training","Use the momentum to set up routines"],
+    food:["Lean protein to support training: eggs, chicken, fish, Greek yogurt","Complex carbs for fuel: oats, quinoa, whole grains","Fermented foods for gut health: kimchi, sauerkraut, kefir","Fresh vegetables, sprouts and salads"]},
+  ovu:{hormones:["Estrogen peaks","LH surge","Small testosterone rise","Ovulation ~24–36 h after LH surge"],
+    body:"Peak estrogen triggers the LH surge, which releases the egg. Cervical mucus becomes clear and stretchy, and some people feel one-sided pelvic twinges (mittelschmerz). Basal body temperature rises slightly after ovulation.",
+    mood:"Often the peak for energy, confidence, sociability and libido.",
+    ease:["High-intensity workouts are well tolerated","Heat for ovulation twinges","Drink plenty of water"],
+    food:["Cruciferous vegetables to support estrogen clearance: broccoli, cauliflower, Brussels sprouts","Antioxidant-rich fruit: berries, citrus","Zinc: pumpkin seeds, chickpeas","Fiber to keep digestion moving"]},
+  lut:{hormones:["Progesterone dominant","Estrogen moderate, second smaller peak","Basal temperature up ~0.3–0.5 °C"],
+    body:"The corpus luteum secretes progesterone, which stabilizes the uterine lining. Progesterone slightly raises body temperature and resting metabolism, can slow digestion, and may increase appetite.",
+    mood:"Progesterone has a calming effect for many people. Energy is steadier and often a bit lower, with a pull toward cozy routines.",
+    ease:["Moderate exercise: steady cardio, pilates, strength at lighter loads","Keep sleep consistent","Eat regular meals to avoid energy dips"],
+    food:["Complex carbs to support serotonin: sweet potato, brown rice, oats","Magnesium: leafy greens, pumpkin seeds, dark chocolate","Vitamin B6: chickpeas, bananas, salmon, potatoes","Protein at each meal for steady blood sugar"]},
+  pms:{hormones:["Progesterone falling","Estrogen falling","Serotonin can dip"],
+    body:"Without pregnancy, the corpus luteum breaks down and estrogen and progesterone fall quickly. This withdrawal, and its effect on serotonin, is linked to PMS symptoms like bloating, breast tenderness, cravings, poor sleep and irritability.",
+    mood:"Mood can be more sensitive, irritable or low. Plan a lighter schedule where you can and be gentle with yourself.",
+    ease:["Cut back on salt, caffeine and alcohol to ease bloating and breast tenderness","Gentle movement and time outdoors","Protect your sleep","Calcium and magnesium have evidence for easing PMS","If mood symptoms are severe or disruptive, it's worth discussing PMDD with a provider"],
+    food:["Calcium: yogurt, milk, fortified plant milk, tofu","Potassium for bloating: bananas, avocado, potatoes","Magnesium: dark chocolate, almonds, spinach","Steady, regular meals for cravings","Warm herbal teas like chamomile or peppermint"]}
+};
+
+/* ---------- date helpers ---------- */
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseKey=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
+const dayNum=k=>{const [y,m,d]=k.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
+const fromNum=n=>{const d=new Date(n*864e5);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())};
+const addDays=(k,n)=>fromNum(dayNum(k)+n);
+const todayKey=()=>keyOf(new Date());
+const fmt=(k,o)=>parseKey(k).toLocaleDateString(undefined,o||{month:"short",day:"numeric"});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cssv=v=>`var(${v})`;
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ---------- state ---------- */
+function freshState(){return{v:1,settings:{setupDone:false,weekStart:0,lists:JSON.parse(JSON.stringify(DEFAULT_LISTS)),goals:[],lastBackup:null},entries:{}}}
+let S;
+try{S=JSON.parse(localStorage.getItem(STORE))||freshState()}catch(e){S=freshState()}
+if(!S.settings)S=freshState();
+for(const [c] of CATS){if(!S.settings.lists[c])S.settings.lists[c]=DEFAULT_LISTS[c].slice()}
+let storageOK=true;
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S));storageOK=true}catch(e){storageOK=false}}
+
+/* ---------- cycle engine ---------- */
+function periodGroups(){
+  const days=Object.keys(S.entries).filter(k=>S.entries[k].period).sort();
+  const g=[];
+  for(const k of days){
+    const last=g[g.length-1];
+    if(last&&dayNum(k)-dayNum(last.end)<=2){last.end=k}else g.push({start:k,end:k});
+  }
+  g.forEach(x=>x.len=dayNum(x.end)-dayNum(x.start)+1);
+  return g;
+}
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+let C=null; // cached cycle stats
+function computeCycle(){
+  const groups=periodGroups();
+  const lens=[];
+  for(let i=1;i<groups.length;i++){const d=dayNum(groups[i].start)-dayNum(groups[i-1].start);if(d>=18&&d<=50)lens.push(d)}
+  const L=lens.length?Math.round(mean(lens.slice(-6))):28;
+  const t=todayKey();
+  const doneGroups=groups.filter((x,i)=>i<groups.length-1||x.end<addDays(t,-1));
+  const P=doneGroups.length?Math.min(10,Math.max(2,Math.round(mean(doneGroups.slice(-6).map(x=>x.len))))):5;
+  const last=groups.length?groups[groups.length-1].start:null;
+  let next=last?addDays(last,L):null;
+  const overdue=!!next&&next<t;
+  if(overdue)next=addDays(t,1); // late: treat as expected any day
+  const periodSet=new Set(Object.keys(S.entries).filter(k=>S.entries[k].period));
+  C={groups,lens,L,P,last,next,overdue,periodSet,known:lens.length>0};
+  C.insights=computeInsights();
+}
+function phaseFor(day,L,P){
+  const ov=Math.max(P+2,L-14);
+  if(day<=P)return"men";
+  if(day<ov-1)return"fol";
+  if(day<=ov+1)return"ovu";
+  if(day>=L-4)return"pms";
+  return"lut";
+}
+function cycleInfo(k){
+  if(!C.last)return null;
+  const t=todayKey();
+  const {L,P}=C;
+  if(k<=t){
+    let start=null;
+    for(const g of C.groups){if(g.start<=k)start=g.start;else break}
+    if(!start)return null;
+    const day=dayNum(k)-dayNum(start)+1;
+    let ph;
+    if(C.periodSet.has(k))ph="men";
+    else{ph=phaseFor(day,L,P);if(ph==="men")ph="fol";if(day>L)ph="pms"}
+    return{day,phase:ph,predicted:false,late:day>L};
+  }
+  // future
+  let day;
+  if(k>=C.next){day=((dayNum(k)-dayNum(C.next))%L)+1}
+  else{day=dayNum(k)-dayNum(C.last)+1;
+    // still inside a currently logged period that may continue
+  }
+  let ph=phaseFor(day,L,P);
+  // days after a logged period end in the current cycle shouldn't show menstrual unless the period is ongoing
+  if(ph==="men"&&k<C.next){
+    const g=C.groups[C.groups.length-1];
+    if(!(g.end>=addDays(t,-1)))ph="fol";
+  }
+  return{day,phase:ph,predicted:true,late:false};
+}
+function computeInsights(){
+  const res={byDay:{},byPhase:{},low:[],high:[],cycles:0,symptomsByPhase:{},energyByPhase:{}};
+  if(!C||!C.last)return res;
+  const t=todayKey();
+  for(const k in S.entries){
+    if(k>t)continue;
+    const e=S.entries[k];const ci=cycleInfo(k);if(!ci)continue;
+    if(e.mood){(res.byDay[ci.day]=res.byDay[ci.day]||[]).push(e.mood);(res.byPhase[ci.phase]=res.byPhase[ci.phase]||[]).push(e.mood)}
+    if(e.energy!=null)(res.energyByPhase[ci.phase]=res.energyByPhase[ci.phase]||[]).push(e.energy+1);
+    const sy=(e.tags&&e.tags.symptoms)||[];
+    if(sy.length){const m=res.symptomsByPhase[ci.phase]=res.symptomsByPhase[ci.phase]||{n:0,c:{}};m.n++;sy.forEach(s=>m.c[s]=(m.c[s]||0)+1)}
+  }
+  res.cycles=C.groups.length-1;
+  if(res.cycles>=2){
+    const all=[].concat(...Object.values(res.byDay));
+    if(all.length>=20){
+      const avg=mean(all);const L=C.L;
+      const sm=[];
+      for(let d=1;d<=L;d++){
+        const vals=[];for(let j=d-1;j<=d+1;j++){if(res.byDay[j])vals.push(...res.byDay[j])}
+        sm[d]=vals.length>=2?mean(vals):null;
+      }
+      const runs=(test)=>{const out=[];let s=null;for(let d=1;d<=L+1;d++){const ok=d<=L&&sm[d]!=null&&test(sm[d]);if(ok&&s==null)s=d;if(!ok&&s!=null){if(d-s>=2)out.push([s,d-1]);s=null}}return out};
+      res.low=runs(v=>v<=avg-0.4);res.high=runs(v=>v>=avg+0.4);res.avg=avg;
+    }
+  }
+  return res;
+}
+function inLowWindow(day){return C.insights.low.some(([a,b])=>day>=a&&day<=b)}
+
+/* ---------- ui helpers ---------- */
+function face(level,size){
+  const mouths={5:"M8 13.5 Q12 19 16 13.5",4:"M8.5 14.5 Q12 17.3 15.5 14.5",3:"M8.5 15.2 H15.5",2:"M8.5 16.3 Q12 13.6 15.5 16.3",1:"M8 17.2 Q12 12.4 16 17.2"};
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" width="${size||44}" height="${size||44}"><circle cx="12" cy="12" r="11" fill="${cssv(MOODS[level].c)}"/><circle cx="8.8" cy="9.6" r="1.25" fill="var(--surface)"/><circle cx="15.2" cy="9.6" r="1.25" fill="var(--surface)"/><path d="${mouths[level]}" stroke="var(--surface)" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>`;
+}
+const ICONS={
+  today:'<path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="4"/>',
+  calendar:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  trends:'<path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/>',
+  settings:'<path d="M5 7h9M18 7h1M5 17h3M12 17h7"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  left:'<path d="M15 5l-7 7 7 7"/>',right:'<path d="M9 5l7 7-7 7"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>'
+};
+const ico=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+function toast(msg){const h=document.getElementById("toastHost");h.innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>h.innerHTML="",1800)}
+let sheetEl=null;
+function openSheet(html,onMount){
+  closeSheet();
+  sheetEl=document.createElement("div");sheetEl.className="scrim";
+  sheetEl.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  sheetEl.addEventListener("click",e=>{if(e.target===sheetEl||e.target.closest("[data-close]"))closeSheet()});
+  document.body.appendChild(sheetEl);document.body.style.overflow="hidden";
+  if(onMount)onMount(sheetEl.firstElementChild);
+}
+function closeSheet(){if(sheetEl){sheetEl.remove();sheetEl=null;document.body.style.overflow=""}}
+function confirmSheet(title,text,okLabel,onOk){
+  openSheet(`<h2>${esc(title)}</h2><p class="muted">${esc(text)}</p><div class="row" style="margin-top:14px"><button class="btn danger" id="cOk">${esc(okLabel)}</button><button class="btn ghost" data-close>Cancel</button></div>`,
+    el=>el.querySelector("#cOk").onclick=()=>{closeSheet();onOk()});
+}
+
+/* ---------- routing ---------- */
+let view="today", curDate=todayKey(), calMonth=(()=>{const d=new Date();return{y:d.getFullYear(),m:d.getMonth()}})();
+const app=document.getElementById("app");
+function renderTabs(){
+  const t=[["today","Today"],["calendar","Calendar"],["trends","Trends"],["settings","Settings"]];
+  document.getElementById("tabs").innerHTML=t.map(([k,l])=>`<button class="tab" data-tab="${k}" ${view===k?'aria-current="page"':""}>${ico(k)}${l}</button>`).join("");
+}
+document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;go(b.dataset.tab)});
+function go(v,date){view=v;if(date)curDate=date;render();window.scrollTo(0,0)}
+function render(){computeCycle();renderTabs();({today:renderToday,calendar:renderCalendar,trends:renderTrends,settings:renderSettings})[view]()}
+
+/* ---------- today / entry ---------- */
+function entryFor(k){return S.entries[k]||{}}
+function setEntry(k,fn){
+  const e=S.entries[k]?S.entries[k]:{tags:{}};
+  if(!e.tags)e.tags={};
+  fn(e);
+  S.entries[k]=e;save();
+}
+function segHTML(name,labels,val,cols){
+  return `<div class="seg" style="grid-template-columns:repeat(${cols||labels.length},1fr)">${labels.map((l,i)=>`<button class="chip" data-set="${name}" data-v="${i}" aria-pressed="${val===i}">${esc(l)}</button>`).join("")}</div>`;
+}
+function phaseBanner(k){
+  const ci=cycleInfo(k);
+  if(!ci)return `<button class="phase-banner" data-act="setup"><span class="swatch" style="background:var(--line)"></span><span class="grow"><b>Add your last period</b><span class="small muted">So Dandy can show your cycle phases and predictions</span></span><span class="chev">›</span></button>`;
+  const p=PH[ci.phase];
+  let sub=`Cycle day ${ci.day}`;
+  if(k===todayKey()&&C.next){const dn=dayNum(C.next)-dayNum(k);sub+=C.overdue?` · period ${dayNum(k)-dayNum(addDays(C.last,C.L))} day${dayNum(k)-dayNum(addDays(C.last,C.L))===1?"":"s"} late`:dn>0?` · period in ~${dn} day${dn===1?"":"s"}`:" · period expected today"}
+  if(ci.late&&k!==todayKey())sub+=" · longer than average cycle";
+  return `<button class="phase-banner" data-act="phase" data-phase="${ci.phase}" data-k="${k}"><span class="swatch" style="background:${cssv(p.v)}"></span><span class="grow"><b>${p.name} phase</b><span class="small muted">${sub}</span></span><span class="chev">›</span></button>`;
+}
+function backupDue(){
+  const n=Object.keys(S.entries).length;if(n<5)return false;
+  const lb=S.settings.lastBackup;return !lb||dayNum(todayKey())-dayNum(lb)>=30;
+}
+function renderToday(){
+  const k=curDate,e=entryFor(k),t=todayKey();
+  const isToday=k===t;
+  const title=isToday?"Today":fmt(k,{weekday:"long"});
+  const sl=e.sleep||{};
+  const hrs=sleepHours(sl.bed,sl.wake);
+  const L=S.settings.lists;
+  const tagCard=(cat,label)=>{
+    const sel=(e.tags&&e.tags[cat])||[];
+    const items=L[cat].slice();sel.forEach(x=>{if(!items.includes(x))items.push(x)});
+    return `<div class="card"><div class="label">${label}${sel.length?`<small>${sel.length} selected</small>`:""}</div><div class="chips">${items.map(x=>`<button class="chip${cat==="symptoms"?" men":""}" data-tag="${cat}" data-v="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`).join("")}</div></div>`;
+  };
+  app.innerHTML=`
+  <header class="top"><h1><span class="sub">${fmt(k,{weekday:"short",month:"long",day:"numeric",year:k.slice(0,4)===t.slice(0,4)?undefined:"numeric"})}</span>${esc(title)}</h1>
+    <button class="iconbtn" data-act="prev" aria-label="Previous day">${ico("left")}</button>
+    <button class="iconbtn" data-act="next" aria-label="Next day" ${isToday?"disabled style='opacity:.35'":""}>${ico("right")}</button></header>
+  <div class="view">
+    ${!isToday?`<button class="pillbtn" data-act="jumpToday" style="align-self:flex-start">Back to today</button>`:""}
+    ${!storageOK?`<div class="banner">This browser isn't letting Dandy save. Open Dandy from your home screen icon.</div>`:""}
+    ${isToday&&backupDue()?`<div class="banner"><span>It's been a while since your last backup.</span><button class="btn" data-act="export">Back up</button></div>`:""}
+    ${phaseBanner(k)}
+    <div class="card"><div class="label">How was your day?</div><div class="moods">${[5,4,3,2,1].map(m=>`<button class="mood" data-set="mood" data-v="${m}" aria-pressed="${e.mood===m}">${face(m)}${MOODS[m].n}</button>`).join("")}</div></div>
+    <div class="card"><div class="label">Period</div>
+      <div class="toggle"><button class="chip men" data-set="period" data-v="1" aria-pressed="${e.period===true}">On my period</button><button class="chip" data-set="period" data-v="0" aria-pressed="${e.period===false}">Not on period</button></div>
+      ${e.period?`<div style="margin-top:12px"><div class="label">Flow</div>${segHTML("flow",FLOW,e.flow)}</div>`:""}
+    </div>
+    <div class="card"><div class="label">Sleep${hrs!=null?`<small>${hrs.toFixed(1)} hours</small>`:""}</div>
+      <div class="row"><label class="field"><span>Bedtime</span><input type="time" id="bed" value="${sl.bed||""}"></label><label class="field"><span>Woke up</span><input type="time" id="wake" value="${sl.wake||""}"></label></div>
+      <div style="margin-top:12px">${segHTML("sleepq",SLEEPQ.slice().reverse(),sl.q==null?null:3-sl.q)}</div>
+    </div>
+    <div class="card"><div class="label">Energy</div>${segHTML("energy",ENERGY,e.energy)}</div>
+    <div class="card"><div class="label">Physical activity</div>${segHTML("activity",ACTIVITY,e.activity,3)}</div>
+    <div class="card"><div class="label">Eating</div>${segHTML("eating",EATING.slice().reverse(),e.eating==null?null:3-e.eating)}</div>
+    ${CATS.map(([c,l])=>tagCard(c,l)).join("")}
+    ${S.settings.goals.length?`<div class="card"><div class="label">Goals</div>${S.settings.goals.map(g=>`<label class="goal"><input type="checkbox" data-goal="${g.id}" ${e.goals&&e.goals[g.id]?"checked":""}><span>${esc(g.name)}</span></label>`).join("")}</div>`
+      :`<div class="card"><div class="label">Goals</div><p class="empty" style="margin:0">No goals yet. <button class="textlink" data-act="toSettings">Add a goal</button></p></div>`}
+    <div class="card"><div class="label">Note</div><textarea id="note" placeholder="Anything else about today?">${esc(e.note||"")}</textarea></div>
+    <div class="saved" id="saved">${S.entries[k]?"Saved on this phone":""}</div>
+  </div>`;
+}
+function sleepHours(b,w){if(!b||!w)return null;const [bh,bm]=b.split(":").map(Number),[wh,wm]=w.split(":").map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<=0)m+=1440;return m/60}
+function flash(){const s=document.getElementById("saved");if(s)s.textContent="Saved on this phone"}
+
+app.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const k=curDate;
+  if(view==="today"){
+    if(b.dataset.set){
+      const f=b.dataset.set,v=Number(b.dataset.v);
+      setEntry(k,en=>{
+        if(f==="mood")en.mood=en.mood===v?undefined:v;
+        else if(f==="period"){const on=v===1;en.period=en.period===on?undefined:on;if(!en.period)delete en.flow;else if(en.flow==null)en.flow=2}
+        else if(f==="flow")en.flow=v;
+        else if(f==="sleepq"){en.sleep=en.sleep||{};const q=3-v;en.sleep.q=en.sleep.q===q?undefined:q}
+        else if(f==="eating"){const q=3-v;en.eating=en.eating===q?undefined:q}
+        else en[f]=en[f]===v?undefined:v;
+      });
+      const y=window.scrollY;render();window.scrollTo(0,y);flash();return;
+    }
+    if(b.dataset.tag){
+      const c=b.dataset.tag,v=b.dataset.v;
+      setEntry(k,en=>{const a=en.tags[c]=en.tags[c]||[];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v)});
+      b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");flash();
+      if(c==="symptoms"){computeCycle()}
+      return;
+    }
+  }
+  const act=b.dataset.act;if(!act)return;
+  if(act==="prev")go("today",addDays(curDate,-1));
+  else if(act==="next"&&curDate<todayKey())go("today",addDays(curDate,1));
+  else if(act==="jumpToday")go("today",todayKey());
+  else if(act==="phase")phaseSheet(b.dataset.phase,b.dataset.k);
+  else if(act==="setup")setupSheet();
+  else if(act==="export")exportData();
+  else if(act==="toSettings")go("settings");
+});
+app.addEventListener("change",e=>{
+  const t=e.target;
+  if(view==="today"){
+    if(t.id==="bed"||t.id==="wake"){setEntry(curDate,en=>{en.sleep=en.sleep||{};en.sleep[t.id]=t.value||undefined});const y=window.scrollY;render();window.scrollTo(0,y);flash()}
+    if(t.dataset.goal){setEntry(curDate,en=>{en.goals=en.goals||{};en.goals[t.dataset.goal]=t.checked});flash()}
+  }
+});
+app.addEventListener("input",e=>{
+  if(view==="today"&&e.target.id==="note"){const v=e.target.value;clearTimeout(app.nt);app.nt=setTimeout(()=>{setEntry(curDate,en=>en.note=v);flash()},400)}
+});
+
+/* ---------- phase sheet ---------- */
+function phaseSheet(ph,k){
+  const p=PH[ph],info=PHASE_INFO[ph],ins=C.insights;
+  const moods=ins.byPhase[ph]||[];
+  const sym=ins.symptomsByPhase[ph];
+  const topSym=sym?Object.entries(sym.c).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]):[];
+  const en=ins.energyByPhase[ph]||[];
+  let personal="";
+  if(moods.length>=3||topSym.length){
+    personal=`<h3>Your pattern</h3><ul>${moods.length>=3?`<li>Average mood in this phase: <b>${mean(moods).toFixed(1)}</b> of 5 (${moods.length} days)</li>`:""}${en.length>=3?`<li>Average energy: <b>${mean(en).toFixed(1)}</b> of 5</li>`:""}${topSym.length?`<li>Most common symptoms: ${topSym.map(esc).join(", ")}</li>`:""}</ul>`;
+  }
+  const ci=k?cycleInfo(k):null;
+  openSheet(`<button class="iconbtn close" data-close aria-label="Close">${ico("x")}</button>
+    <span class="small muted">${ci?`Cycle day ${ci.day}${ci.predicted?" · predicted":""}`:""}</span>
+    <h2 style="color:${cssv(p.v)}">${p.name} phase</h2>
+    <div class="hormone">${info.hormones.map(h=>`<span>${esc(h)}</span>`).join("")}</div>
+    <h3>What's happening</h3><p>${esc(info.body)}</p>
+    <h3>How you may feel</h3><p>${esc(info.mood)}</p>
+    ${personal}
+    <h3>To ease symptoms</h3><ul>${info.ease.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    <h3>Foods that help</h3><ul>${info.food.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    <p class="small muted" style="margin-top:16px">Phase timing is estimated from your logged periods (ovulation ≈ 14 days before your next period). General information, not medical advice.</p>`);
+}
+
+/* ---------- calendar ---------- */
+function renderCalendar(){
+  const {y,m}=calMonth;
+  const first=new Date(y,m,1);const days=new Date(y,m+1,0).getDate();
+  const ws=S.settings.weekStart;
+  const lead=(first.getDay()-ws+7)%7;
+  const t=todayKey();
+  const dowN=["S","M","T","W","T","F","S"];
+  let cells="";
+  for(let i=0;i<lead;i++)cells+=`<div class="day out"></div>`;
+  for(let d=1;d<=days;d++){
+    const k=y+"-"+pad(m+1)+"-"+pad(d);
+    const ci=cycleInfo(k),e=S.entries[k];
+    let style="",cls="day";
+    if(ci){
+      const col=cssv(PH[ci.phase].v);
+      if(ci.phase==="men"&&!ci.predicted)style=`background:${col};color:#FFF8F2`;
+      else if(ci.predicted&&ci.phase==="men"){style=`border-color:${col};background:color-mix(in srgb, ${col} 14%, transparent)`;cls+=" predicted"}
+      else style=`background:color-mix(in srgb, ${col} ${ci.predicted?22:40}%, transparent)`;
+    }
+    if(k===t)cls+=" today";
+    const dot=e&&e.mood?`<span class="dot" style="background:${cssv(MOODS[e.mood].c)};${ci&&ci.phase==="men"&&!ci.predicted?"box-shadow:0 0 0 1.5px #FFF8F2":""}"></span>`:"";
+    const heads=ci&&ci.predicted&&inLowWindow(ci.day)?`<span class="heads" title="Your mood often dips around now"></span>`:"";
+    cells+=`<button class="${cls}" style="${style}" data-day="${k}" aria-label="${fmt(k,{month:"long",day:"numeric"})}${ci?", "+PH[ci.phase].name:""}${e&&e.mood?", mood "+MOODS[e.mood].n:""}">${d}${dot}${heads}</button>`;
+  }
+  const nextTxt=C.next?(C.overdue?"Late":(()=>{const n=dayNum(C.next)-dayNum(t);return n<=0?"Today":n+" d"})()):"–";
+  const ins=C.insights;
+  let insightsHTML="";
+  if(ins.low.length||ins.high.length){
+    insightsHTML=ins.low.map(([a,b])=>`<div class="insight"><i style="background:var(--m2)"></i><span>Your mood tends to dip on cycle days <b>${a}–${b}</b> (${PH[phaseFor(Math.round((a+b)/2),C.L,C.P)].name.toLowerCase()} phase). Future days in this window get a small dot.</span></div>`).join("")+
+      ins.high.map(([a,b])=>`<div class="insight"><i style="background:var(--m5)"></i><span>You tend to feel your best on cycle days <b>${a}–${b}</b>.</span></div>`).join("");
+  }else{
+    const need=Math.max(0,2-Math.max(0,ins.cycles));
+    insightsHTML=`<p class="empty" style="margin:0">${need>0?`After ${need} more full cycle${need===1?"":"s"} of logging, Dandy will point out which cycle days your mood tends to dip or peak.`:"Keep logging your mood. Personal patterns appear once there are enough days to compare."}</p>`;
+  }
+  app.innerHTML=`
+  <header class="top"><h1><span class="sub">Cycle</span>Calendar</h1></header>
+  <div class="view">
+    <div class="card">
+      <div class="cal-head"><button class="iconbtn" data-cal="-1" aria-label="Previous month">${ico("left")}</button><h2>${first.toLocaleDateString(undefined,{month:"long",year:"numeric"})}</h2><button class="iconbtn" data-cal="1" aria-label="Next month">${ico("right")}</button></div>
+      <div class="dow">${[0,1,2,3,4,5,6].map(i=>`<div>${dowN[(i+ws)%7]}</div>`).join("")}</div>
+      <div class="grid" style="margin-top:6px">${cells}</div>
+      <div class="legend">${Object.entries(PH).map(([k,p])=>`<span><i style="background:${cssv(p.v)}"></i>${p.name}</span>`).join("")}<span><i style="border:1.5px dashed var(--ph-men)"></i>Predicted period</span></div>
+    </div>
+    ${C.last?"":`<div class="banner"><span>Add your recent periods to see phases.</span><button class="btn" data-act="setup">Add</button></div>`}
+    <div class="stats">
+      <div class="stat"><b>${C.known?C.L:"–"}</b><span>avg cycle (days)</span></div>
+      <div class="stat"><b>${C.groups.length?C.P:"–"}</b><span>avg period (days)</span></div>
+      <div class="stat"><b>${nextTxt}</b><span>${C.next?"next period "+fmt(C.next):"next period"}</span></div>
+    </div>
+    ${!C.known&&C.last?`<p class="small muted" style="margin:0">Predictions use a 28-day cycle until two periods are logged.</p>`:""}
+    <div class="card"><div class="label">Your patterns</div>${insightsHTML}</div>
+    <div class="card"><div class="label">Phases</div>${Object.entries(PH).map(([k,p])=>`<button class="list-item" style="width:100%;border-left:none;border-right:none;border-bottom:none;background:none;text-align:left" data-phaseinfo="${k}"><span style="display:flex;align-items:center;gap:10px"><i style="width:12px;height:12px;border-radius:4px;background:${cssv(p.v)};display:inline-block"></i>${p.name}</span><span class="chev">›</span></button>`).join("")}</div>
+  </div>`;
+}
+app.addEventListener("click",e=>{
+  if(view!=="calendar")return;
+  const c=e.target.closest("[data-cal]");
+  if(c){let {y,m}=calMonth;m+=Number(c.dataset.cal);if(m<0){m=11;y--}if(m>11){m=0;y++}calMonth={y,m};renderCalendar();return}
+  const d=e.target.closest("[data-day]");if(d){daySheet(d.dataset.day);return}
+  const p=e.target.closest("[data-phaseinfo]");if(p)phaseSheet(p.dataset.phaseinfo);
+});
+function daySheet(k){
+  const ci=cycleInfo(k),e=S.entries[k]||{};const future=k>todayKey();
+  const tags=e.tags?[].concat(...Object.values(e.tags)):[];
+  openSheet(`<button class="iconbtn close" data-close aria-label="Close">${ico("x")}</button>
+    <span class="small muted">${fmt(k,{weekday:"long"})}</span><h2>${fmt(k,{month:"long",day:"numeric"})}</h2>
+    ${ci?`<button class="phase-banner" id="dsPhase" style="margin-top:10px"><span class="swatch" style="background:${cssv(PH[ci.phase].v)}"></span><span class="grow"><b>${PH[ci.phase].name}</b><span class="small muted">Cycle day ${ci.day}${ci.predicted?" · predicted":""}</span></span><span class="chev">›</span></button>`:""}
+    ${e.mood?`<div class="row" style="margin-top:14px">${face(e.mood,36)}<span><b>${MOODS[e.mood].n}</b>${e.period?` · period${e.flow!=null?" ("+FLOW[e.flow].toLowerCase()+")":""}`:""}</span></div>`:(!future?`<p class="muted" style="margin-top:14px">Nothing logged for this day.</p>`:"")}
+    ${tags.length?`<p class="small muted" style="margin-top:8px">${tags.map(esc).join(" · ")}</p>`:""}
+    ${e.note?`<p style="margin-top:8px">${esc(e.note)}</p>`:""}
+    ${future?"":`<div style="margin-top:16px"><button class="btn" id="dsEdit">${S.entries[k]?"Edit entry":"Log this day"}</button></div>`}`,
+  el=>{const p=el.querySelector("#dsPhase");if(p)p.onclick=()=>phaseSheet(ci.phase,k);const b=el.querySelector("#dsEdit");if(b)b.onclick=()=>{closeSheet();go("today",k)}});
+}
+
+/* ---------- trends ---------- */
+function renderTrends(){
+  const ins=C.insights,t=todayKey();
+  const ents=Object.entries(S.entries).filter(([k])=>k<=t);
+  const withMood=ents.filter(([,e])=>e.mood);
+  // mood by cycle day chart
+  let chart;
+  const maxDay=Math.max(C.L,...Object.keys(ins.byDay).map(Number).filter(d=>d<=45),0);
+  if(Object.keys(ins.byDay).length>=3){
+    const W=340,H=150,pl=22,pb=22,pt=8,bw=(W-pl)/maxDay;
+    let bars="";
+    for(let d=1;d<=maxDay;d++){
+      const v=ins.byDay[d];const ph=phaseFor(d,C.L,C.P);
+      const x=pl+(d-1)*bw;
+      if(v){const a=mean(v);const h=(a/5)*(H-pb-pt);bars+=`<rect x="${(x+bw*0.15).toFixed(1)}" y="${(H-pb-h).toFixed(1)}" width="${(bw*0.7).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${cssv(PH[ph].v)}"><title>Day ${d}: ${a.toFixed(1)} (${v.length})</title></rect>`}
+      if(d===1||d%7===0)bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${H-6}" font-size="9" text-anchor="middle" fill="var(--muted)">${d}</text>`;
+    }
+    let grid="";for(const g of [1,3,5]){const y=H-pb-(g/5)*(H-pb-pt);grid+=`<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="0.8"/><text x="${pl-5}" y="${y+3}" font-size="9" text-anchor="end" fill="var(--muted)">${g}</text>`}
+    chart=`<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average mood by cycle day">${grid}${bars}</svg></div><p class="small muted" style="margin:6px 0 0">Bars colored by phase. Mood scale 1 (awful) to 5 (great).</p>`;
+  }else chart=`<p class="empty">Log your mood on a few more days with your period dates added to see this chart.</p>`;
+  const barRows=(rows,max,colorFn)=>rows.map(r=>`<div class="barrow"><span>${esc(r[0])}</span><div class="bar"><div style="width:${Math.max(4,(r[1]/max)*100)}%;background:${colorFn(r)}"></div></div><span class="num">${r[2]}</span></div>`).join("");
+  const byPhase=Object.keys(PH).filter(p=>ins.byPhase[p]&&ins.byPhase[p].length).map(p=>[PH[p].name,mean(ins.byPhase[p]),mean(ins.byPhase[p]).toFixed(1),p]);
+  const pm=withMood.filter(([,e])=>e.period).map(([,e])=>e.mood),npm=withMood.filter(([,e])=>e.period===false||(!e.period&&C.last)).map(([,e])=>e.mood);
+  // last 30 days line
+  const days30=[];for(let i=29;i>=0;i--){const k=addDays(t,-i);days30.push([k,S.entries[k]&&S.entries[k].mood])}
+  let line="";
+  if(days30.filter(x=>x[1]).length>=2){
+    const W=340,H=110,pl=6,pr=6,pt=10,pb=18;const sx=i=>pl+i*(W-pl-pr)/29,sy=v=>pt+(5-v)/4*(H-pt-pb);
+    let path="",pts="";let pen=false;
+    days30.forEach(([k,v],i)=>{if(v){path+=(pen?"L":"M")+sx(i).toFixed(1)+" "+sy(v).toFixed(1);pen=true;pts+=`<circle cx="${sx(i).toFixed(1)}" cy="${sy(v).toFixed(1)}" r="3" fill="${cssv(MOODS[v].c)}"/>`}else pen=false});
+    let g="";[1,3,5].forEach(v=>g+=`<line x1="0" x2="${W}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)" stroke-width="0.8"/>`);
+    line=`<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mood over the last 30 days">${g}<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/>${pts}<text x="${pl}" y="${H-4}" font-size="9" fill="var(--muted)">${fmt(days30[0][0])}</text><text x="${W-pr}" y="${H-4}" font-size="9" text-anchor="end" fill="var(--muted)">Today</text></svg></div>`;
+  }else line=`<p class="empty">Log a few days to see your mood line.</p>`;
+  // sleep
+  const sl=ents.map(([,e])=>e).filter(e=>e.sleep);
+  const hrsArr=sl.map(e=>sleepHours(e.sleep.bed,e.sleep.wake)).filter(x=>x!=null);
+  const byQ=[3,2,1,0].map(q=>{const ms=ents.filter(([,e])=>e.mood&&e.sleep&&e.sleep.q===q).map(([,e])=>e.mood);return ms.length?[SLEEPQ[q]+" sleep",mean(ms),mean(ms).toFixed(1)]:null}).filter(Boolean);
+  const byAct=[4,3,2,1,0].map(a=>{const ms=ents.filter(([,e])=>e.mood&&e.activity===a).map(([,e])=>e.mood);return ms.length?[ACTIVITY[a],mean(ms),mean(ms).toFixed(1)]:null}).filter(Boolean);
+  // emotions
+  const emo={};ents.forEach(([,e])=>((e.tags&&e.tags.emotions)||[]).forEach(x=>emo[x]=(emo[x]||0)+1));
+  const topEmo=Object.entries(emo).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const symRows=Object.keys(PH).filter(p=>ins.symptomsByPhase[p]).map(p=>{const s=ins.symptomsByPhase[p];const top=Object.entries(s.c).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);return `<div class="insight"><i style="background:${cssv(PH[p].v)}"></i><span><b>${PH[p].name}:</b> ${top.map(esc).join(", ")}</span></div>`}).join("");
+  const moodColor=r=>cssv(MOODS[Math.max(1,Math.min(5,Math.round(r[1])))].c);
+  app.innerHTML=`
+  <header class="top"><h1><span class="sub">${withMood.length} day${withMood.length===1?"":"s"} logged</span>Trends</h1></header>
+  <div class="view">
+    <div class="card"><div class="label">Average mood by cycle day</div>${chart}</div>
+    <div class="card"><div class="label">Mood by phase</div>${byPhase.length?barRows(byPhase,5,r=>cssv(PH[r[3]].v)):`<p class="empty">Appears once you log moods with your periods added.</p>`}</div>
+    <div class="card"><div class="label">On your period vs. not</div>${pm.length&&npm.length?barRows([["On period",mean(pm),mean(pm).toFixed(1)],["Not on period",mean(npm),mean(npm).toFixed(1)]],5,moodColor):`<p class="empty">Needs moods logged both on and off your period.</p>`}</div>
+    <div class="card"><div class="label">Last 30 days</div>${line}</div>
+    <div class="card"><div class="label">Sleep${hrsArr.length?`<small>avg ${mean(hrsArr).toFixed(1)} h</small>`:""}</div>${byQ.length?`<p class="small muted" style="margin:0 0 6px">Average mood after each kind of night</p>`+barRows(byQ,5,moodColor):`<p class="empty">Log sleep quality to compare it with your mood.</p>`}</div>
+    <div class="card"><div class="label">Activity and mood</div>${byAct.length?barRows(byAct,5,moodColor):`<p class="empty">Log physical activity to see how it relates to mood.</p>`}</div>
+    <div class="card"><div class="label">Common symptoms by phase</div>${symRows||`<p class="empty">Log period symptoms to see which phases bring them.</p>`}</div>
+    <div class="card"><div class="label">Most frequent emotions</div>${topEmo.length?barRows(topEmo.map(([n,c])=>[n,c,c]),topEmo[0][1],()=>"var(--accent)"):`<p class="empty">Your most logged emotions will show here.</p>`}</div>
+  </div>`;
+}
+
+/* ---------- settings ---------- */
+let editing=null; // {cat,i}
+function renderSettings(){
+  const L=S.settings.lists;
+  const catCard=([c,l])=>`<div class="card"><div class="label">${l}<small>${L[c].length} items</small></div>
+    <div class="chips">${L[c].map((x,i)=>editing&&editing.cat===c&&editing.i===i
+      ?`<span class="editchip"><input type="text" id="ren" value="${esc(x)}" data-cat="${c}" data-i="${i}" aria-label="Rename ${esc(x)}"></span>`
+      :`<span class="editchip"><button data-ren="${c}" data-i="${i}" aria-label="Rename ${esc(x)}">${esc(x)}</button><button class="x" data-del="${c}" data-i="${i}" aria-label="Remove ${esc(x)}">×</button></span>`).join("")}</div>
+    <form class="addrow" data-add="${c}"><input type="text" id="add-${c}" placeholder="Add to ${l.toLowerCase()}" aria-label="Add to ${l}"><button class="btn ghost">Add</button></form></div>`;
+  const groups=C.groups.slice().reverse();
+  app.innerHTML=`
+  <header class="top"><h1><span class="sub">Dandy</span>Settings</h1></header>
+  <div class="view">
+    <div class="card"><div class="label">Periods<button class="textlink" data-act="setup">Add past period</button></div>
+      ${groups.length?groups.slice(0,8).map(g=>`<div class="list-item"><span>${fmt(g.start,{month:"short",day:"numeric",year:"numeric"})} · ${g.len} day${g.len===1?"":"s"}</span><button class="textlink" data-delperiod="${g.start}|${g.end}">Remove</button></div>`).join(""):`<p class="empty" style="margin:0">No periods logged yet.</p>`}
+    </div>
+    <div class="card"><div class="label">Goals</div>
+      ${S.settings.goals.map(g=>`<div class="list-item"><span>${esc(g.name)}</span><button class="textlink" data-delgoal="${g.id}">Remove</button></div>`).join("")||`<p class="empty" style="margin:0">Simple yes/no goals you check off each day.</p>`}
+      <form class="addrow" data-addgoal><input type="text" id="add-goal" placeholder="e.g. Read 10 pages" aria-label="New goal"><button class="btn ghost">Add</button></form></div>
+    <p class="small muted" style="margin:4px 2px -4px">Tap an item to rename it. Removing an item keeps it on days you already logged.</p>
+    ${CATS.map(catCard).join("")}
+    <div class="card"><div class="label">Week starts on</div>${segHTML("weekStart",["Sunday","Monday"],S.settings.weekStart)}</div>
+    <div class="card"><div class="label">Backup</div>
+      <p class="small muted" style="margin:0 0 10px">Your entries live only on this phone. Tap Export backup, then choose Save to Files. Do this about once a month.${S.settings.lastBackup?" Last backup: "+fmt(S.settings.lastBackup,{month:"short",day:"numeric",year:"numeric"})+".":""}</p>
+      <div class="row"><button class="btn" data-act="export">Export backup</button><button class="btn ghost" data-act="importPick">Import backup</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>
+    </div>
+    <div class="card"><div class="label">Reminders</div>
+      <details><summary>Set up morning and evening reminders</summary>
+      <ol><li>Open the <b>Shortcuts</b> app → <b>Automation</b> → <b>+</b> → <b>Time of Day</b>.</li><li>Pick your morning time, Daily, and <b>Run Immediately</b>.</li><li>Add the action <b>Open App</b> → choose <b>Dandy</b>. Or add <b>Show Notification</b> with "Check your goals".</li><li>Repeat with an evening time and "Log your day in Dandy".</li></ol>
+      <p class="muted">Dandy must be added to your home screen first so it appears in the app list.</p></details>
+    </div>
+    <div class="card"><div class="label">Data</div><button class="btn danger" data-act="reset">Erase all data</button></div>
+    <p class="small muted" style="text-align:center">Dandy · cycle and mood journal</p>
+  </div>`;
+  const r=document.getElementById("ren");if(r){r.focus();r.select()}
+}
+function commitRename(inp){
+  const c=inp.dataset.cat,i=Number(inp.dataset.i),old=S.settings.lists[c][i],nv=inp.value.trim();
+  editing=null;
+  if(nv&&nv!==old&&!S.settings.lists[c].includes(nv)){
+    S.settings.lists[c][i]=nv;
+    for(const k in S.entries){const a=S.entries[k].tags&&S.entries[k].tags[c];if(a){const j=a.indexOf(old);if(j>=0)a[j]=nv}}
+    save();
+  }
+  renderSettings();
+}
+app.addEventListener("submit",e=>{
+  e.preventDefault();if(view!=="settings")return;
+  const f=e.target;
+  if(f.dataset.add){const c=f.dataset.add,inp=f.querySelector("input"),v=inp.value.trim();if(v&&!S.settings.lists[c].includes(v)){S.settings.lists[c].push(v);save();renderSettings();document.getElementById("add-"+c).focus()}}
+  if(f.hasAttribute("data-addgoal")){const v=f.querySelector("input").value.trim();if(v){S.settings.goals.push({id:uid(),name:v});save();renderSettings()}}
+});
+app.addEventListener("focusout",e=>{if(e.target.id==="ren")commitRename(e.target)});
+app.addEventListener("keydown",e=>{if(e.target.id==="ren"&&e.key==="Enter"){e.preventDefault();e.target.blur()}});
+app.addEventListener("click",e=>{
+  if(view!=="settings")return;
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.ren){editing={cat:b.dataset.ren,i:Number(b.dataset.i)};renderSettings();return}
+  if(b.dataset.del){S.settings.lists[b.dataset.del].splice(Number(b.dataset.i),1);save();renderSettings();return}
+  if(b.dataset.delgoal){S.settings.goals=S.settings.goals.filter(g=>g.id!==b.dataset.delgoal);save();renderSettings();return}
+  if(b.dataset.set==="weekStart"){S.settings.weekStart=Number(b.dataset.v);save();renderSettings();return}
+  if(b.dataset.delperiod){
+    const [a,z]=b.dataset.delperiod.split("|");
+    confirmSheet("Remove this period?",`Clears the period mark from ${fmt(a)} to ${fmt(z)}. Moods and other entries on those days stay.`,"Remove",()=>{
+      for(let k=a;k<=z;k=addDays(k,1)){const en=S.entries[k];if(en){delete en.period;delete en.flow;if(isEmptyEntry(en))delete S.entries[k]}}
+      save();render();toast("Period removed");
+    });return;
+  }
+  const act=b.dataset.act;
+  if(act==="importPick")document.getElementById("importFile").click();
+  if(act==="reset")confirmSheet("Erase all data?","This deletes every entry, period and setting on this phone. Export a backup first if you might want it back.","Erase everything",()=>{S=freshState();save();render();toast("All data erased")});
+});
+app.addEventListener("change",e=>{
+  if(e.target.id!=="importFile")return;
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const d=JSON.parse(rd.result);if(!d||!d.entries||!d.settings)throw 0;
+      const n=Object.keys(d.entries).length;
+      confirmSheet("Replace your data?",`This backup has ${n} entr${n===1?"y":"ies"}. Importing replaces everything currently in Dandy.`,"Import",()=>{S=d;for(const [c] of CATS){if(!S.settings.lists[c])S.settings.lists[c]=DEFAULT_LISTS[c].slice()}save();render();toast("Backup imported")});
+    }catch(err){toast("That file isn't a Dandy backup")}
+  };
+  rd.readAsText(f);e.target.value="";
+});
+function isEmptyEntry(en){return !en.mood&&en.period==null&&!en.sleep&&en.energy==null&&en.activity==null&&en.eating==null&&!en.note&&!(en.tags&&Object.values(en.tags).some(a=>a.length))&&!(en.goals&&Object.values(en.goals).some(Boolean))}
+
+/* ---------- export ---------- */
+function exportData(){
+  const data=JSON.stringify(S,null,1);
+  const name="dandy-backup-"+todayKey()+".json";
+  const mark=()=>{S.settings.lastBackup=todayKey();save();render()};
+  try{
+    const file=new File([data],name,{type:"application/json"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:"Dandy backup"}).then(()=>{mark();toast("Backup saved")}).catch(err=>{if(!err||err.name!=="AbortError")copyBackup(data)});
+      return;
+    }
+    const url=URL.createObjectURL(file);
+    const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    mark();toast("Backup downloaded");
+  }catch(e){copyBackup(data)}
+}
+function copyBackup(data){
+  openSheet(`<button class="iconbtn close" data-close aria-label="Close">${ico("x")}</button><h2>Copy your backup</h2>
+    <p class="muted small">Copy this text and paste it into a note or a file to keep it safe. To restore, save it as a .json file and use Import backup.</p>
+    <textarea id="bk" readonly style="min-height:160px;font-size:11px">${esc(data)}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn" id="cp">Copy</button></div>`,
+  el=>el.querySelector("#cp").onclick=async()=>{const ta=el.querySelector("#bk");try{await navigator.clipboard.writeText(ta.value);S.settings.lastBackup=todayKey();save();toast("Copied")}catch(e){ta.focus();ta.select();toast("Selected. Use Copy from the menu.")}});
+}
+
+/* ---------- setup / add past period ---------- */
+function setupSheet(){
+  const first=!S.settings.setupDone;
+  const list=()=>C.groups.slice().reverse().slice(0,6).map(g=>`<div class="list-item"><span>${fmt(g.start,{month:"short",day:"numeric"})} · ${g.len} day${g.len===1?"":"s"}</span></div>`).join("");
+  openSheet(`${first?"":`<button class="iconbtn close" data-close aria-label="Close">${ico("x")}</button>`}
+    ${first?`<span class="small muted">Welcome to Dandy</span><h2>Let's start with your recent periods</h2><p class="muted">Add the last one or two periods you remember. Dandy uses them to color your calendar by phase and predict what's next.</p>`
+      :`<h2>Add a past period</h2>`}
+    <form id="pform" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+      <div class="row"><label class="field"><span>First day</span><input type="date" id="pstart" max="${todayKey()}" required></label>
+      <label class="field" style="max-width:120px"><span>How many days</span><input type="number" id="plen" min="1" max="12" value="5" required></label></div>
+      <button class="btn">Add period</button>
+    </form>
+    <div id="plist" style="margin-top:12px">${list()}</div>
+    <div class="row" style="margin-top:16px">${first?`<button class="btn ghost" id="pdone">Done</button>`:""}</div>`,
+  el=>{
+    el.querySelector("#pform").onsubmit=ev=>{
+      ev.preventDefault();
+      const s=el.querySelector("#pstart").value,n=Math.max(1,Math.min(12,Number(el.querySelector("#plen").value)||5));
+      if(!s)return;
+      for(let i=0;i<n;i++){const k=addDays(s,i);if(k>todayKey())break;setEntry(k,en=>{en.period=true;if(en.flow==null)en.flow=i===0||i>=n-1?1:2})}
+      computeCycle();el.querySelector("#plist").innerHTML=list();el.querySelector("#pstart").value="";toast("Period added");
+    };
+    const d=el.querySelector("#pdone");if(d)d.onclick=()=>{S.settings.setupDone=true;save();closeSheet();render()};
+  });
+  sheetEl.addEventListener("click",ev=>{if(ev.target===sheetEl||ev.target.closest("[data-close]")){S.settings.setupDone=true;save();render()}});
+}
+
+/* ---------- boot ---------- */
+render();
+if(!S.settings.setupDone&&!Object.keys(S.entries).length)setupSheet();
+// refresh "today" after midnight when reopened
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!sheetEl){const t=todayKey();if(view==="today"&&curDate<t&&render.lastDay!==t){curDate=t}render.lastDay=t;render()}});
+render.lastDay=todayKey();
+})();
+</script>
+
+</body>
+</html>
